@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Company password</title>
+<style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}
+</style>
+<script type="text/javascript" src="shacrypt.js"></script>
+<script>
+var sha256_crypt =  Module.cwrap('sha256_crypt', 'string', ['string','string']);
+ 
+function changetd(elementid, val) {
+  const Element = document.getElementById(elementid);
+  if (val == true) {
+    Element.innerHTML = '<font color="green">Good</font>';
+  } else {
+    Element.innerHTML = '<font color="red">Bad</font>';
+  }
+}
+
+function secureSalt(saltLen) {
+    var goodchars = [];
+    var maxval = 0;
+    var salt = "";
+    
+    for (var i=97; i<123; i++) {
+      goodchars.push(String.fromCharCode(i));
+      goodchars.push(String.fromCharCode(i).toUpperCase());
+    }
+    for (var i=48; i<58; i++)
+      goodchars.push(String.fromCharCode(i));  
+    goodchars.push('.')
+    goodchars.push('/')
+    
+    maxval = goodchars.length;
+    for (i=0;i<saltLen;i++) {
+      rnd = Math.floor(Math.random()*maxval)
+      salt += goodchars[rnd];
+    }
+    return salt;
+}
+
+function PassMatchCheck() {
+  const passElement1 = document.getElementById('pass1');
+  const passElement2 = document.getElementById('pass2');
+  if (passElement1.value == passElement2.value) {
+    salt = secureSalt(16)
+    result = sha256_crypt(passElement1.value,salt);
+    const resultElement = document.getElementById('result');
+    resultElement.innerHTML = "Success! Your password hash is <br/>" + result;
+  }
+}
+
+function PassStrengthCheck(password) {
+    var lcchars = [];
+    var upchars = [];
+    var digchars = [];
+    var specchars = [];
+    
+    for (var i=97; i<123; i++)
+      lcchars.push(String.fromCharCode(i));
+    for (var i=0; i<lcchars.length; i++)
+      upchars.push(lcchars[i].toUpperCase());
+    for (var i=48; i<58; i++)
+      digchars.push(String.fromCharCode(i));
+    for (var i=33; i<48; i++)
+      specchars.push(String.fromCharCode(i));
+    
+    
+    flagLC = lcchars.some(subchar=>password.includes(subchar));
+    changetd("lcok", flagLC);
+    flagUC = upchars.some(subchar=>password.includes(subchar));
+    changetd("ucok", flagUC);
+    flagD = digchars.some(subchar=>password.includes(subchar));
+    changetd("digok", flagD);
+    flagS = specchars.some(subchar=>password.includes(subchar));
+    changetd("scok", flagS);
+    if(password.length>=8 && password.length<24) {
+      flagLen = true;
+    } else {
+      flagLen = false;
+    }
+    changetd("lenok", flagLen);
+
+    if (flagLC == true && flagUC == true && flagD == true && flagS == true &&
+      flagLen == true) {
+        const Element = document.getElementById('pass2div');
+        if (Element.style.display === "none") { 
+          Element.style.display = "inline";
+        }
+    } else {
+        const Element = document.getElementById('pass2div');
+        if (Element.style.display === "inline") { 
+          Element.style.display = "none";
+        }
+    }
+}
+function bodyready() {
+  const passElement1 = document.getElementById('pass1');
+  const passElement2 = document.getElementById('pass2');
+  
+  passElement1.addEventListener('input', (event) => {
+    PassStrengthCheck(passElement1.value);
+  });
+  
+  passElement2.addEventListener('input', (event) => {
+    PassMatchCheck();
+  });
+  // TBD/FIXME: Signal that wasm is ready
+  //Module.onRuntimeInitialized = function() {
+  //}
+
+}
+
+</script>
+<body onload="bodyready()">
+<center>
+  <!-- <img src="https://www.company.com/Logo.svg"><br/> -->
+<table >
+  <tr><td>Lowercase</td><td id="lcok">No</td></tr>
+  <tr><td>Uppercase</td><td id="ucok">No</td></tr>
+  <tr><td>Digits</td><td id="digok">No</td></tr>
+  <tr><td>Special characters</td><td id="scok">No</td></tr>
+  <tr><td>Length (8-24)</td><td id="lenok">No</td></tr>
+</table>
+
+Please enter your password:<br/>
+<form>
+  <input type="password" id="pass1"><br/>
+  <div id="pass2div" style="display: none;">Please repeat password again:<br/>
+  <input type="password" id="pass2"><br/>
+  </div><br/>
+  <div id="result">
+    
+  </div>
+
+</form>
+</center>
+</body>
+</html>
