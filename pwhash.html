@@ -1,7 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>Company password</title>
+<title>Companyname password sha256crypt generator</title>
 <style>
 table, th, td {
   border: 1px solid black;
@@ -11,7 +11,8 @@ table, th, td {
 <script type="text/javascript" src="shacrypt.js"></script>
 <script>
 var sha256_crypt =  Module.cwrap('sha256_crypt', 'string', ['string','string']);
- 
+
+// Update TD in table, if password criteria is good
 function changetd(elementid, val) {
   const Element = document.getElementById(elementid);
   if (val == true) {
@@ -21,6 +22,7 @@ function changetd(elementid, val) {
   }
 }
 
+// Generate secure salt (actually not really secure, haha)
 function secureSalt(saltLen) {
     var goodchars = [];
     var maxval = 0;
@@ -43,6 +45,7 @@ function secureSalt(saltLen) {
     return salt;
 }
 
+// If pass match, that means time to generate hash
 function PassMatchCheck() {
   const passElement1 = document.getElementById('pass1');
   const passElement2 = document.getElementById('pass2');
@@ -54,6 +57,8 @@ function PassMatchCheck() {
   }
 }
 
+// Verify password for several criteria 
+// (lowercase char, uppercase char, digit, special char, length)
 function PassStrengthCheck(password) {
     var lcchars = [];
     var upchars = [];
@@ -98,6 +103,8 @@ function PassStrengthCheck(password) {
         }
     }
 }
+
+// With jquery i can use just "$(function() {", heh
 function bodyready() {
   const passElement1 = document.getElementById('pass1');
   const passElement2 = document.getElementById('pass2');
