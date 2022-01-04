@@ -50,7 +50,7 @@ function PassMatchCheck() {
   const passElement1 = document.getElementById('pass1');
   const passElement2 = document.getElementById('pass2');
   if (passElement1.value == passElement2.value) {
-    salt = secureSalt(16)
+    salt = secureSalt(10)
     result = sha256_crypt(passElement1.value,salt);
     const resultElement = document.getElementById('result');
     resultElement.innerHTML = "Success! Your password hash is <br/>" + result;
